@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <base href="{{ base_url }}" target="_blank">
+    <title>Firebase Custom Auth Management</title>
+    <style>
+        input {
+            width: 500px;
+            display: block;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Register</h1>
+    <form id="register">
+        <input type="email" name="email" placeholder="email" required>
+        <br>
+        <input type="password" name="password" placeholder="password" required>
+        <br>
+        <p class="error"></p>
+        <p class="success"></p>
+        <button type="submit">Register</button>
+    </form>
+    <hr>
+    <h1>Sign in</h1>
+    <form id="sign-in">
+        <input type="email" name="email" placeholder="email" required>
+        <br>
+        <input type="password" name="password" placeholder="password" required>
+        <br>
+        <p class="error"></p>
+        <p class="success"></p>
+        <button type="submit">Sign in</button>
+    </form>
+    <form id="resend-verification-email" style="display:none;">
+        <button type="submit">Resend verification email</button>
+        <p class="error"></p>
+        <p class="success"></p>
+    </form>
+    <hr>
+    <h1>Forgot Password</h1>
+    <form id="forgot-password">
+        <input type="email" name="email" placeholder="your email address" required>
+        <br>
+        <p class="error"></p>
+        <p class="success"></p>
+        <button type="submit">Send reset password email</button>
+    </form>
+
+    <script src="./static/jquery-3.3.1.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "{{ firebase_config['firebase-apiKey'] }}",
+            authDomain: "{{ firebase_config['firebase-authDomain'] }}",
+            databaseURL: "{{ firebase_config['firebase-databaseURL'] }}",
+            projectId: "{{ firebase_config['firebase-projectId'] }}",
+            storageBucket: "{{ firebase_config['firebase-storageBucket'] }}",
+            messagingSenderId: "{{ firebase_config['firebase-messagingSenderId'] }}",
+        };
+        firebase.initializeApp(firebaseConfig);
+
+
+        $("#register").submit(function (event) {
+            $("#register p").html("")
+            event.preventDefault();
+            const submitedData = $(this).serializeArray().reduce(function (obj, item) {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+            const email = submitedData['email'];
+            const password = submitedData['password'];
+            firebase.auth().createUserWithEmailAndPassword(email, password).then(function (user) {
+                sendVerificationEmail($("#register"));
+            }).catch(function (error) {
+                $("#register p.error").html(error.message);
+            });
+        });
+
+        $("#sign-in").submit(function (event) {
+            $("#sign-in p").html("");
+            event.preventDefault();
+            const submitedData = $(this).serializeArray().reduce(function (obj, item) {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+            const email = submitedData['email'];
+            const password = submitedData['password'];
+            firebase.auth().signInWithEmailAndPassword(email, password).then(function (user) {
+                if (!user.user.emailVerified) {
+                    $("#sign-in p.error").html("please verify your email first");
+                    $("#resend-verification-email").css("display", "block");
+                } else {
+                    $("#sign-in p.success").html('success');
+                }
+            }).catch(function (error) {
+                $("#sign-in p.error").html(error.message);
+            });
+        });
+
+        $("#forgot-password").submit(function(event) {
+            $("#forgot-password p").html("")
+            event.preventDefault();
+            const submitedData = $(this).serializeArray().reduce(function (obj, item) {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+            const email = submitedData['email'];
+            $.ajax("./api/auth/send_password_reset", {
+                data: JSON.stringify({
+                    email: email,
+                }),
+                contentType: 'application/json',
+                type: 'POST',
+                success: function (data) {
+                    $("#forgot-password p.success").html(data['msg'])
+                },
+                error: function(data) {
+                    $("#forgot-password .error").html(data['responseJSON']['msg']);
+                },
+            });
+        });
+
+        $("#resend-verification-email").submit(function (event) {
+            $("#resend-verification-email p").html();
+            event.preventDefault();
+            sendVerificationEmail($("#resend-verification-email"));
+        })
+
+        function sendVerificationEmail(formElement) {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                user.getIdToken(true).then(function (token) {
+                    $.ajax("./api/auth/send_verification", {
+                        data: JSON.stringify({
+                            token: token,
+                        }),
+                        contentType: 'application/json',
+                        type: 'POST',
+                        success: function (data) {
+                            formElement.find("p.success").html(data['msg']);
+                        },
+                        error: function(data) {
+                            formElement.find("p.error").html(data['responseJSON']['msg']);
+                        }
+                    });
+                })
+            } else {
+                formElement.find("p.error").html('please login first');
+            }
+        }
+
+    </script>
+</body>
+
+</html>

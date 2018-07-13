@@ -1,0 +1,7 @@
+Hi there,
+
+You register to my website!
+
+Click the below link to verify your email address
+
+{url}

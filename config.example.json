@@ -1,0 +1,21 @@
+{
+    "firebase-apiKey": "", 
+    "firebase-authDomain": "",
+    "firebase-databaseURL": "",
+    "firebase-projectId": "",
+    "firebase-storageBucket": "",
+    "firebase-messagingSenderId": "",
+
+    "jwt-secret": "",
+
+    "mailgun-domain-name": "",
+    "mailgun-api-key": "",
+
+    "application-base-url": "http://localhost:5000/",
+
+    "email-account-name": "no-reply",
+    "password-reset-token-lifetime-hours": 1,
+    "verification-token-lifetime-hours": 1,
+    "password-reset-email-subject": "Reset your password",
+    "verification-email-subject": "Verify your email address"
+}
