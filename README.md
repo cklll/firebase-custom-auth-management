@@ -50,4 +50,14 @@ By default, you have a sandbox account and you can *ONLY* send emails to whiteli
 If you wish to use your own domain, check the [documentation](https://documentation.mailgun.com/en/latest/user_manual.html#verifying-your-domain) for details
 
 # Screenshots
-*TODO*
+* Register an account and log in immediately without verifying the email
+
+![Register an account and log in immediately without verifying the email](https://i.imgur.com/O2eFdaE.gif)
+
+* Login after verifying the email
+
+![Log in after verifying the email](https://i.imgur.com/NoIiR3G.gif)
+
+* Reset password
+
+![Reset password](https://i.imgur.com/UdGug2q.gif)
